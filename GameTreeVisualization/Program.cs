@@ -20,17 +20,28 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API for game tree visualization"
     });
 });
-
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    });
 // Services
 builder.Services.AddScoped<ITreeStorageService, RedisStorageService>();
 builder.Services.AddScoped<ITreeProcessingService, TreeProcessingService>();
+builder.Services.AddScoped<IGameSessionService, GameSessionService>();
+if (string.IsNullOrEmpty(builder.Configuration["Storage:MatchesPath"]))
+{
+    // Add the default path to configuration
+    builder.Configuration["Storage:MatchesPath"] = "matches";
+}
 
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("http://localhost:5001")
+        builder.WithOrigins("http://localhost:3000")
             .AllowAnyMethod()
             .AllowAnyHeader();
     });

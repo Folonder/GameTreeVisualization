@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using GameTreeVisualization.Converters;
+using GameTreeVisualization.Models;
 using GameTreeVisualization.Services.Interfaces;
 
 namespace GameTreeVisualization.Services;
@@ -57,6 +58,28 @@ public class TreeProcessingService : ITreeProcessingService
             _logger.LogError(ex, "Error processing tree data: {Message}", ex.Message);
             throw;
         }
+    }
+
+    private bool ValidatePatchOperation(PatchOperation op)
+    {
+        if (string.IsNullOrEmpty(op.Op))
+            return false;
+            
+        string opType = op.Op.ToLower();
+        if (opType != "add" && opType != "remove" && opType != "replace" &&
+            opType != "move" && opType != "copy" && opType != "test")
+        {
+            return false;
+        }
+        
+        if (string.IsNullOrEmpty(op.Path))
+            return false;
+            
+        // "value" is required for all operations except "remove"
+        if (opType != "remove" && op.Value.ValueKind == JsonValueKind.Undefined)
+            return false;
+            
+        return true;
     }
 
     private void ValidateTree(TreeNode tree)
@@ -188,6 +211,4 @@ public class TreeProcessingService : ITreeProcessingService
             }
         }
     }
-
-
 }
