@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GameTreeVisualization.Models;
+namespace GameTreeVisualization.Models.Tree;
 
 public class NodeStatistics
 {

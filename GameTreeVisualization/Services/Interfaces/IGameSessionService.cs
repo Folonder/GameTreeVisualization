@@ -1,4 +1,4 @@
-﻿using GameTreeVisualization.Models;
+﻿using GameTreeVisualization.Models.Tree;
 
 namespace GameTreeVisualization.Services.Interfaces;
 

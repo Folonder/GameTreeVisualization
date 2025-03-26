@@ -1,4 +1,6 @@
 ﻿using GameTreeVisualization.Models;
+using GameTreeVisualization.Models.Requests;
+using GameTreeVisualization.Models.Tree;
 using GameTreeVisualization.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

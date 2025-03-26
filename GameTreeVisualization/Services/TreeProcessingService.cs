@@ -2,9 +2,8 @@
 using System.Text.Json.Serialization;
 using GameTreeVisualization.Converters;
 using GameTreeVisualization.Models;
+using GameTreeVisualization.Models.Tree;
 using GameTreeVisualization.Services.Interfaces;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GameTreeVisualization.Services;
@@ -93,31 +92,6 @@ public class TreeProcessingService : ITreeProcessingService
             foreach (var child in node.Children)
             {
                 await ProcessNode(child, depth + 1);
-            }
-        }
-    }
-
-    public async Task<Dictionary<int, int>> CalculateDepthStatistics(TreeNode tree)
-    {
-        var stats = new Dictionary<int, int>();
-        await CalculateDepthStatsRecursive(tree, stats);
-        return stats;
-    }
-
-    private async Task CalculateDepthStatsRecursive(TreeNode node, Dictionary<int, int> stats)
-    {
-        if (node == null) return;
-
-        if (!stats.ContainsKey(node.Depth))
-            stats[node.Depth] = 0;
-
-        stats[node.Depth] += node.Statistics?.NumVisits ?? 0;
-
-        if (node.Children != null)
-        {
-            foreach (var child in node.Children)
-            {
-                await CalculateDepthStatsRecursive(child, stats);
             }
         }
     }

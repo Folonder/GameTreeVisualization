@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GameTreeVisualization.Models;
+using GameTreeVisualization.Models.Tree;
 using GameTreeVisualization.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

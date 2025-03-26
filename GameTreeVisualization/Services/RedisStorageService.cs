@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using GameTreeVisualization.Models;
+using GameTreeVisualization.Models.Tree;
 using GameTreeVisualization.Services.Interfaces;
 using StackExchange.Redis;
 
@@ -42,17 +43,5 @@ public class RedisStorageService : ITreeStorageService
             data,
             TimeSpan.FromMinutes(_expirationMinutes)
         );
-    }
-
-    public async Task<bool> TreeExists()
-    {
-        var db = _redis.GetDatabase();
-        return await db.KeyExistsAsync(KeyPrefix + "current");
-    }
-
-    public async Task ClearStorage()
-    {
-        var db = _redis.GetDatabase();
-        await db.KeyDeleteAsync(KeyPrefix + "current");
     }
 }

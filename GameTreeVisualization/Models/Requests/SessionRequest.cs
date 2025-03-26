@@ -1,4 +1,4 @@
-﻿namespace GameTreeVisualization.Models
+﻿namespace GameTreeVisualization.Models.Requests
 {
     public class SessionRequest
     {

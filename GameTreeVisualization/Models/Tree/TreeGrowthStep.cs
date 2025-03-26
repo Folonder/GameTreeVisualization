@@ -1,4 +1,4 @@
-﻿namespace GameTreeVisualization.Models
+﻿namespace GameTreeVisualization.Models.Tree
 {
     public class TreeGrowthStep
     {

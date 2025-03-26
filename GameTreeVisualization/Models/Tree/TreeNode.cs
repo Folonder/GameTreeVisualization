@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GameTreeVisualization.Models;
+namespace GameTreeVisualization.Models.Tree;
 
 public class TreeNode
 {
@@ -14,7 +14,7 @@ public class TreeNode
     public NodeStatistics Statistics { get; set; }
     
     [JsonProperty(PropertyName = "children")]
-    public List<TreeNode> Children { get; set; } = new List<TreeNode>();
+    public List<TreeNode> Children { get; set; } = [];
     
     public int Depth { get; set; }
 }
