@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 
+namespace GameTreeVisualization.Models;
+
 public class TreeNode
 {
     [JsonProperty(PropertyName = "id")]

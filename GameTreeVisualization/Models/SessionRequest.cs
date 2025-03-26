@@ -1,5 +1,4 @@
-﻿// Models/SessionRequest.cs
-namespace GameTreeVisualization.Models
+﻿namespace GameTreeVisualization.Models
 {
     public class SessionRequest
     {

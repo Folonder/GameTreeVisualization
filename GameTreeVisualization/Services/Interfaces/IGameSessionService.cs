@@ -4,13 +4,8 @@ namespace GameTreeVisualization.Services.Interfaces;
 
 public interface IGameSessionService
 {
-    Task<bool> SessionExists(string sessionId);
-    Task<TreeNode> GetInitialTree(string sessionId);
-    Task<List<TreePatch>> GetPatches(string sessionId);
-    Task<List<TreeGrowthStep>> CalculateTreeGrowth(string sessionId);
+    bool SessionExists(string sessionId);
     
-    // Новые методы
-    Task<List<int>> GetAvailableTurns(string sessionId);
-    Task<TreeNode> GetTurnInitialTree(string sessionId, int turnNumber);
+    List<int> GetAvailableTurns(string sessionId);
     Task<List<TreeGrowthStep>> GetTurnGrowth(string sessionId, int turnNumber);
 }

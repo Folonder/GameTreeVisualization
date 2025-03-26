@@ -1,9 +1,8 @@
-﻿// Models/TurnRequest.cs
-namespace GameTreeVisualization.Models
+﻿namespace GameTreeVisualization.Models
 {
     public class TurnRequest
     {
-        public string SessionId { get; set; }
+        public required string SessionId { get; set; }
         public int TurnNumber { get; set; }
     }
 }

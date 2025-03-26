@@ -1,4 +1,6 @@
-﻿namespace GameTreeVisualization.Services.Interfaces;
+﻿using GameTreeVisualization.Models;
+
+namespace GameTreeVisualization.Services.Interfaces;
 
 public interface ITreeProcessingService
 {

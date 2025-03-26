@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using GameTreeVisualization.Models;
 using GameTreeVisualization.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,22 +52,6 @@ public class GameTreeController : ControllerBase
         {
             _logger.LogError(ex, "Error getting current tree");
             return StatusCode(500, "Error retrieving tree data");
-        }
-    }
-
-    [HttpGet("stats")]
-    public async Task<ActionResult<Dictionary<int, int>>> GetDepthStatistics()
-    {
-        try
-        {
-            var tree = await _treeService.GetCurrentTree();
-            var stats = await _treeService.CalculateDepthStatistics(tree);
-            return Ok(stats);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calculating statistics");
-            return StatusCode(500, "Error calculating tree statistics");
         }
     }
 }

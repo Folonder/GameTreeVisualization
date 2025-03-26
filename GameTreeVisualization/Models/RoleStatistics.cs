@@ -1,5 +1,6 @@
-﻿using GameTreeVisualization.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+
+namespace GameTreeVisualization.Models;
 
 public class RoleStatistics
 {
@@ -7,5 +8,5 @@ public class RoleStatistics
     public string Role { get; set; }
     
     [JsonProperty(PropertyName = "actions")]
-    public List<ActionStatistics> Actions { get; set; } = new List<ActionStatistics>();
+    public List<ActionStatistics> Actions { get; set; } = [];
 }

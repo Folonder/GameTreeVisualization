@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 
+namespace GameTreeVisualization.Models;
+
 public class NodeStatistics
 {
     [JsonProperty(PropertyName = "numVisits")]
@@ -9,5 +11,5 @@ public class NodeStatistics
     public double RelativeVisits { get; set; }
     
     [JsonProperty(PropertyName = "statisticsForActions")]
-    public List<RoleStatistics> StatisticsForActions { get; set; } = new List<RoleStatistics>();
+    public List<RoleStatistics> StatisticsForActions { get; set; } = [];
 }

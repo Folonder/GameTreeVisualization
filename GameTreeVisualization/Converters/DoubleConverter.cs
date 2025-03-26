@@ -8,26 +8,25 @@ public class DoubleConverter : JsonConverter<double>
 {
     public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.String)
+        if (reader.TokenType != JsonTokenType.String)
         {
-            var stringValue = reader.GetString();
-            if (double.TryParse(stringValue, 
-                    NumberStyles.Any, 
-                    CultureInfo.InvariantCulture, 
-                    out double result))
-            {
-                return result;
-            }
-            // Обработка специальных значений
-            return stringValue?.ToLower() switch
-            {
-                "infinity" or "+infinity" => double.PositiveInfinity,
-                "-infinity" => double.NegativeInfinity,
-                "nan" => double.NaN,
-                _ => 0
-            };
+            return reader.GetDouble();
         }
-        return reader.GetDouble();
+        var stringValue = reader.GetString();
+        if (double.TryParse(stringValue, 
+                NumberStyles.Any, 
+                CultureInfo.InvariantCulture, 
+                out double result))
+        {
+            return result;
+        }
+        return stringValue?.ToLower() switch
+        {
+            "infinity" or "+infinity" => double.PositiveInfinity,
+            "-infinity" => double.NegativeInfinity,
+            "nan" => double.NaN,
+            _ => 0
+        };
     }
 
     public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
