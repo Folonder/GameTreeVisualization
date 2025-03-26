@@ -1,8 +1,15 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using GameTreeVisualization.Converters;
 using GameTreeVisualization.Models;
+using GameTreeVisualization.Models.Redis;
 using GameTreeVisualization.Services.Interfaces;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GameTreeVisualization.Services;
 
@@ -31,7 +38,7 @@ public class TreeProcessingService : ITreeProcessingService
                 Converters = { new DoubleConverter() }
             };
 
-            var tree = JsonSerializer.Deserialize<TreeNode>(jsonData, options);
+            var tree = System.Text.Json.JsonSerializer.Deserialize<TreeNode>(jsonData, options);
             ValidateTree(tree);
 
             // Проверяем и инициализируем Statistics, если нужно
@@ -76,7 +83,7 @@ public class TreeProcessingService : ITreeProcessingService
             return false;
             
         // "value" is required for all operations except "remove"
-        if (opType != "remove" && op.Value.ValueKind == JsonValueKind.Undefined)
+        if (opType != "remove" && op.Value.ValueKind == System.Text.Json.JsonValueKind.Undefined)
             return false;
             
         return true;
@@ -208,6 +215,142 @@ public class TreeProcessingService : ITreeProcessingService
                     // Это значение показывает, какой процент от посещений родителя приходится на этого ребенка
                     child.Statistics.RelativeVisits = (double)childVisits / totalChildrenVisits * 100;
                 }
+            }
+        }
+    }
+    
+    // Новые методы для работы с Redis моделью
+    
+    private TreeNode DeserializeTree(string json)
+    {
+        try
+        {
+            var settings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            
+            // Сначала пробуем десериализовать в Redis модель
+            var redisTree = JsonConvert.DeserializeObject<RedisTree>(json, settings);
+            
+            // Если успешно, конвертируем в TreeNode
+            if (redisTree?.Root != null)
+            {
+                return ConvertRedisTreeToTreeNode(redisTree);
+            }
+            
+            // Как запасной вариант, пробуем прямую десериализацию
+            return JsonConvert.DeserializeObject<TreeNode>(json, settings);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error deserializing tree: {ex.Message}");
+            throw;
+        }
+    }
+    
+    private TreeNode ConvertRedisTreeToTreeNode(RedisTree redisTree)
+    {
+        // Убедимся, что у нас есть корневой узел
+        if (redisTree?.Root == null)
+            return null;
+        
+        // Преобразуем Redis модель в наш TreeNode
+        var tree = ConvertRedisNodeToTreeNode(redisTree.Root, 0);
+        
+        // Рассчитываем относительные посещения
+        RecalculateRelativeVisits(tree);
+        
+        return tree;
+    }
+    
+    private TreeNode ConvertRedisNodeToTreeNode(RedisNode redisNode, int depth)
+    {
+        if (redisNode == null)
+            return null;
+        
+        // Создаем TreeNode из RedisNode
+        var treeNode = new TreeNode
+        {
+            Id = Guid.NewGuid().ToString(),
+            // Объединяем все состояния в одну строку
+            State = redisNode.State != null ? string.Join(", ", redisNode.State) : "",
+            Depth = depth,
+            Children = new List<TreeNode>(),
+            Statistics = new NodeStatistics
+            {
+                NumVisits = redisNode.Statistics?.NumVisits ?? 0,
+                RelativeVisits = 0, // Вычислим позже
+                StatisticsForActions = new List<RoleStatistics>()
+            }
+        };
+        
+        // Обрабатываем статистику действий
+        if (redisNode.Statistics?.StatisticsForActions?.Map != null && 
+            redisNode.Statistics.StatisticsForActions.Roles != null)
+        {
+            foreach (var roleInfo in redisNode.Statistics.StatisticsForActions.Roles)
+            {
+                string roleName = roleInfo.Name?.Value ?? "";
+                
+                if (redisNode.Statistics.StatisticsForActions.Map.TryGetValue(roleName, out var actionMap))
+                {
+                    var roleStats = new RoleStatistics
+                    {
+                        Role = roleName,
+                        Actions = new List<ActionStatistics>()
+                    };
+                    
+                    foreach (var actionEntry in actionMap)
+                    {
+                        roleStats.Actions.Add(new ActionStatistics
+                        {
+                            Action = actionEntry.Key,
+                            AverageActionScore = actionEntry.Value.ActionScore,
+                            ActionNumUsed = actionEntry.Value.ActionNumUsed
+                        });
+                    }
+                    
+                    treeNode.Statistics.StatisticsForActions.Add(roleStats);
+                }
+            }
+        }
+        
+        // Рекурсивно обрабатываем детей
+        if (redisNode.Children != null)
+        {
+            foreach (var childNode in redisNode.Children)
+            {
+                var child = ConvertRedisNodeToTreeNode(childNode, depth + 1);
+                if (child != null)
+                {
+                    treeNode.Children.Add(child);
+                }
+            }
+        }
+        
+        return treeNode;
+    }
+    
+    private void RecalculateRelativeVisits(TreeNode node)
+    {
+        if (node == null) return;
+        
+        // Если у узла есть дети, вычисляем для них относительные значения
+        if (node.Children != null && node.Children.Count > 0)
+        {
+            int totalChildVisits = node.Children.Sum(c => c.Statistics?.NumVisits ?? 0);
+            
+            foreach (var child in node.Children)
+            {
+                if (child.Statistics != null && totalChildVisits > 0)
+                {
+                    child.Statistics.RelativeVisits = (double)(child.Statistics.NumVisits * 100) / totalChildVisits;
+                }
+                
+                // Рекурсивно обрабатываем детей
+                RecalculateRelativeVisits(child);
             }
         }
     }

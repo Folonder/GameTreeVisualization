@@ -73,7 +73,8 @@ namespace GameTreeVisualization.Controllers
         {
             try
             {
-                _logger.LogInformation($"Calculating tree growth for session {request.SessionId} with JSON Patch format");
+                _logger.LogInformation(
+                    $"Calculating tree growth for session {request.SessionId} with JSON Patch format");
                 var growth = await _sessionService.CalculateTreeGrowth(request.SessionId);
                 return Ok(growth);
             }
@@ -81,6 +82,53 @@ namespace GameTreeVisualization.Controllers
             {
                 _logger.LogError(ex, $"Error calculating tree growth for session {request.SessionId}");
                 return StatusCode(500, "Error calculating tree growth");
+            }
+        }
+
+        [HttpPost("turns")]
+        public async Task<ActionResult<List<int>>> GetTurns([FromBody] SessionRequest request)
+        {
+            try
+            {
+                var turns = await _sessionService.GetAvailableTurns(request.SessionId);
+                return Ok(turns);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving turns for session {request.SessionId}");
+                return StatusCode(500, "Error retrieving turns");
+            }
+        }
+
+        [HttpPost("turn/growth")]
+        public async Task<ActionResult<List<TreeGrowthStep>>> GetTurnGrowth([FromBody] TurnRequest request)
+        {
+            try
+            {
+                var growth = await _sessionService.GetTurnGrowth(request.SessionId, request.TurnNumber);
+                return Ok(growth);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    $"Error retrieving turn growth for session {request.SessionId}, turn {request.TurnNumber}");
+                return StatusCode(500, "Error retrieving turn growth");
+            }
+        }
+
+        [HttpPost("turn/initial")]
+        public async Task<ActionResult<TreeNode>> GetTurnInitialTree([FromBody] TurnRequest request)
+        {
+            try
+            {
+                var tree = await _sessionService.GetTurnInitialTree(request.SessionId, request.TurnNumber);
+                return Ok(tree);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    $"Error retrieving initial tree for session {request.SessionId}, turn {request.TurnNumber}");
+                return StatusCode(500, "Error retrieving initial tree for turn");
             }
         }
     }

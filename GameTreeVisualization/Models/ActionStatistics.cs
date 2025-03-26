@@ -1,14 +1,13 @@
-﻿using System.Text.Json.Serialization;
-using GameTreeVisualization.Converters;
-
-namespace GameTreeVisualization.Models;
+﻿using Newtonsoft.Json;
 
 public class ActionStatistics
 {
+    [JsonProperty(PropertyName = "action")]
     public string Action { get; set; }
     
-    [JsonConverter(typeof(DoubleConverter))]
+    [JsonProperty(PropertyName = "averageActionScore")]
     public double AverageActionScore { get; set; }
     
+    [JsonProperty(PropertyName = "actionNumUsed")]
     public int ActionNumUsed { get; set; }
 }

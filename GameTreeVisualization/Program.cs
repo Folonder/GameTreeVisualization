@@ -2,6 +2,7 @@ using System.Text.Json;
 using GameTreeVisualization.Services;
 using GameTreeVisualization.Services.Interfaces;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
     });

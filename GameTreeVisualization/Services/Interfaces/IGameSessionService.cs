@@ -8,4 +8,9 @@ public interface IGameSessionService
     Task<TreeNode> GetInitialTree(string sessionId);
     Task<List<TreePatch>> GetPatches(string sessionId);
     Task<List<TreeGrowthStep>> CalculateTreeGrowth(string sessionId);
+    
+    // Новые методы
+    Task<List<int>> GetAvailableTurns(string sessionId);
+    Task<TreeNode> GetTurnInitialTree(string sessionId, int turnNumber);
+    Task<List<TreeGrowthStep>> GetTurnGrowth(string sessionId, int turnNumber);
 }
