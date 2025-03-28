@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GameTreeVisualization.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class GameSessionController : ControllerBase
 {
     private readonly IGameDataService _gameDataService;
