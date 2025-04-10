@@ -86,4 +86,28 @@ public class GameSessionController : ControllerBase
             return StatusCode(500, "Error retrieving tree");
         }
     }
+    
+    [HttpPost("turn/iteration")]
+    public async Task<ActionResult<IterationDetails>> GetIterationDetails([FromBody] IterationRequest request)
+    {
+        try
+        {
+            var details = await _gameDataService.GetIterationDetails(
+                request.SessionId, 
+                request.TurnNumber, 
+                request.IterationNumber);
+            
+            return Ok(details);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, $"No iteration details found for session {request.SessionId}, turn {request.TurnNumber}, iteration {request.IterationNumber}");
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving iteration details for session {request.SessionId}, turn {request.TurnNumber}, iteration {request.IterationNumber}");
+            return StatusCode(500, "Error retrieving iteration details");
+        }
+    }
 }

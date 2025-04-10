@@ -99,7 +99,7 @@ public class GameDataService : IGameDataService
         try 
         {
             var server = _redis.GetServer(_redis.GetEndPoints().First());
-            var growthKeys = server.Keys(pattern: $"{RedisKeyPrefix}{sessionId}:{turnId}:growth_*")
+            var growthKeys = server.Keys(pattern: $"{RedisKeyPrefix}{sessionId}:{turnId}:growth_*:tree")
                 .Select(k => k.ToString())
                 .OrderBy(ExtractGrowthNumber)
                 .ToList();
@@ -133,10 +133,40 @@ public class GameDataService : IGameDataService
             throw;
         }
     }
+    
+    public async Task<IterationDetails> GetIterationDetails(string sessionId, int turnNumber, int iterationNumber)
+    {
+        try
+        {
+            var db = _redis.GetDatabase();
+            var turnId = turnNumber.ToString("D3");
+            var iterationId = iterationNumber.ToString("D5");
+        
+            // Get iteration stages data
+            var stagesKey = $"{RedisKeyPrefix}{sessionId}:{turnId}:iteration:{iterationId}";
+            var stagesData = await db.StringGetAsync(stagesKey);
+        
+            if (stagesData.IsNull)
+                throw new InvalidOperationException($"Iteration data not found for session {sessionId}, turn {turnNumber}, iteration {iterationNumber}");
+        
+            var iterationDetails = JsonConvert.DeserializeObject<IterationDetails>(stagesData);
+        
+            // Set iteration and turn numbers
+            iterationDetails.IterationNumber = iterationNumber;
+            iterationDetails.TurnNumber = turnNumber;
+        
+            return iterationDetails;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving iteration details for session {sessionId}, turn {turnNumber}, iteration {iterationNumber}");
+            throw;
+        }
+    }
 
     private int ExtractGrowthNumber(string key)
     {
-        var match = Regex.Match(key, @"growth_(\d+)$");
+        var match = Regex.Match(key, @"growth_(\d+)");
         return match.Success ? int.Parse(match.Groups[1].Value) : -1;
     }
 }
